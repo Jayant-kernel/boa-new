@@ -331,6 +331,29 @@ impl JsArray {
         Self::from_object(object)
     }
 
+    /// Calls `Array.prototype.splice`.
+    #[inline]
+    pub fn splice(
+        &self,
+        start: i64,
+        delete_count: Option<u64>,
+        items: &[JsValue],
+        context: &mut Context,
+    ) -> JsResult<Self> {
+        let mut args = Vec::with_capacity(2 + items.len());
+        args.push(start.into());
+        if let Some(count) = delete_count {
+            args.push(count.into());
+        }
+        args.extend_from_slice(items);
+
+        let object = Array::splice(&self.inner.clone().into(), &args, context)?
+            .as_object()
+            .expect("Array.prototype.splice should always return object");
+
+        Self::from_object(object)
+    }
+
     /// Calls `Array.prototype.reduce()`.
     #[inline]
     pub fn reduce(
